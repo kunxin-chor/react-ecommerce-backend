@@ -1,5 +1,6 @@
 USE ecommerce;
 
+-- Products table
 CREATE TABLE products (
   id INT AUTO_INCREMENT PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
@@ -7,14 +8,26 @@ CREATE TABLE products (
   image VARCHAR(255) NOT NULL
 );
 
+-- Users table
 CREATE TABLE users (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  username VARCHAR(50) NOT NULL UNIQUE,
+  name VARCHAR(100) NOT NULL,
   email VARCHAR(100) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
+  salutation VARCHAR(10),
+  country VARCHAR(50),
   created_at DATETIME DEFAULT NOW()
 );
 
+-- Marketing Preferences table
+CREATE TABLE user_marketing_preferences (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  preference VARCHAR(50) NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Cart Items table
 CREATE TABLE cart_items (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,

@@ -1,30 +1,86 @@
 const pool = require('../database');
 
-async function getUserByUsername(username) {
-  if (!username || typeof username !== 'string') {
-    throw new Error('Invalid username');
+async function getUserByEmail(email) {
+  if (!email || typeof email !== 'string') {
+    throw new Error('Invalid email');
   }
-  const [rows] = await pool.query('SELECT * FROM users WHERE username = ?', [username]);
+  const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
   return rows[0];
 }
 
-async function createUser(username, password) {
-  if (!username || !password || typeof username !== 'string' || typeof password !== 'string') {
-    throw new Error('Invalid username or password');
-  }
-  const [result] = await pool.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, password]);
-  return result.insertId;
-}
-
-async function updateUser(id, username, password) {
-  if (!id || !username || !password || typeof id !== 'number' || typeof username !== 'string' || typeof password !== 'string') {
+async function createUser({ name, email, password, salutation, country, marketingPreferences }) {
+  if (!email || !password || typeof email !== 'string' || typeof password !== 'string') {
     throw new Error('Invalid user data');
   }
-  await pool.query('UPDATE users SET username = ?, password = ? WHERE id = ?', [username, password, id]);
+  
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    
+    // Insert user data
+    const [userResult] = await connection.query(
+      `INSERT INTO users (name, email, password, salutation, country) VALUES (?, ?, ?, ?, ?)`,
+      [name, email, password, salutation, country]
+    );
+    const userId = userResult.insertId;
+
+    // Insert marketing preferences
+    if (Array.isArray(marketingPreferences)) {
+      for (const preference of marketingPreferences) {
+        await connection.query(
+          `INSERT INTO user_marketing_preferences (user_id, preference) VALUES (?, ?)`,
+          [userId, preference]
+        );
+      }
+    }
+    
+    await connection.commit();
+    return userId;
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
+}
+
+async function updateUser(id, { name, email, password, salutation, country, marketingPreferences }) {
+  if (!id || !email || !password || typeof id !== 'number' || typeof email !== 'string' || typeof password !== 'string') {
+    throw new Error('Invalid user data');
+  }
+  
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    
+    // Update user data
+    await connection.query(
+      `UPDATE users SET name = ?, email = ?, password = ?, salutation = ?, country = ? WHERE id = ?`,
+      [name, email, password, salutation, country, id]
+    );
+
+    // Update marketing preferences by deleting existing ones and inserting new ones
+    await connection.query(`DELETE FROM user_marketing_preferences WHERE user_id = ?`, [id]);
+    if (Array.isArray(marketingPreferences)) {
+      for (const preference of marketingPreferences) {
+        await connection.query(
+          `INSERT INTO user_marketing_preferences (user_id, preference) VALUES (?, ?)`,
+          [id, preference]
+        );
+      }
+    }
+    
+    await connection.commit();
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
 }
 
 module.exports = {
-  getUserByUsername,
+  getUserByEmail,
   createUser,
   updateUser
 };
