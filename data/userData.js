@@ -12,11 +12,11 @@ async function createUser({ name, email, password, salutation, country, marketin
   if (!email || !password || typeof email !== 'string' || typeof password !== 'string') {
     throw new Error('Invalid user data');
   }
-  
+
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
-    
+
     // Insert user data
     const [userResult] = await connection.query(
       `INSERT INTO users (name, email, password, salutation, country) VALUES (?, ?, ?, ?, ?)`,
@@ -27,13 +27,27 @@ async function createUser({ name, email, password, salutation, country, marketin
     // Insert marketing preferences
     if (Array.isArray(marketingPreferences)) {
       for (const preference of marketingPreferences) {
+        // Retrieve preference ID from marketing_preferences table
+        const [preferenceResult] = await connection.query(
+          `SELECT id FROM marketing_preferences WHERE preference = ?`,
+          [preference]
+        );
+
+        // Check if the preference exists
+        if (preferenceResult.length === 0) {
+          throw new Error(`Invalid marketing preference: ${preference}`);
+        }
+
+        const preferenceId = preferenceResult[0].id;
+
+        // Insert into user_marketing_preferences table
         await connection.query(
-          `INSERT INTO user_marketing_preferences (user_id, preference) VALUES (?, ?)`,
-          [userId, preference]
+          `INSERT INTO user_marketing_preferences (user_id, preference_id) VALUES (?, ?)`,
+          [userId, preferenceId]
         );
       }
     }
-    
+
     await connection.commit();
     return userId;
   } catch (error) {
@@ -43,6 +57,8 @@ async function createUser({ name, email, password, salutation, country, marketin
     connection.release();
   }
 }
+
+
 
 async function updateUser(id, { name, email, password, salutation, country, marketingPreferences }) {
   if (!id || !email || !password || typeof id !== 'number' || typeof email !== 'string' || typeof password !== 'string') {

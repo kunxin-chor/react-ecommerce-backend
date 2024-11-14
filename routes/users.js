@@ -10,17 +10,12 @@ router.post('/register', async (req, res) => {
       name,
       email,
       password,
-      confirmPassword,
       salutation,
       marketingPreferences,
       country
     } = req.body;
 
-    // Check if password and confirmPassword match
-    if (password !== confirmPassword) {
-      return res.status(400).json({ message: "Passwords do not match" });
-    }
-
+   
     // Register user with the new payload structure
     const userId = await userService.registerUser({
       name,

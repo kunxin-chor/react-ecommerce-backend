@@ -1,12 +1,9 @@
 const userData = require('../data/userData');
 const bcrypt = require('bcrypt');
 
-async function registerUser({ name, email, password, confirmPassword, salutation, marketingPreferences, country }) {
+async function registerUser({ name, email, password, salutation, marketingPreferences, country }) {
   if (password.length < 8) {
     throw new Error('Password must be at least 8 characters long');
-  }
-  if (password !== confirmPassword) {
-    throw new Error('Passwords do not match');
   }
   
   const existingUser = await userData.getUserByEmail(email);

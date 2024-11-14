@@ -19,13 +19,19 @@ CREATE TABLE users (
   created_at DATETIME DEFAULT NOW()
 );
 
--- Marketing Preferences table
+CREATE TABLE marketing_preferences (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  preference VARCHAR(50) NOT NULL UNIQUE
+);
+
 CREATE TABLE user_marketing_preferences (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
-  preference VARCHAR(50) NOT NULL,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+  preference_id INT NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (preference_id) REFERENCES marketing_preferences(id) ON DELETE CASCADE
 );
+
 
 -- Cart Items table
 CREATE TABLE cart_items (
