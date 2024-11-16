@@ -2,24 +2,27 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 function createLineItems(orderItems) {
-    // Create line items with Stripe, and also store the product id and quantity in the metadata
     const lineItems = orderItems.map(item => ({
         price_data: {
             currency: 'usd',
             product_data: {
-                name: item.name,
-                images: [item.image ? item.image : 'https://via.placeholder.com/150']
+                name: item.productName,
+                images: [item.imageUrl || 'https://via.placeholder.com/150'],
+                metadata: {
+                    product_id: item.product_id,
+                    quantity: item.quantity.toString() // Metadata values must be strings
+                }
             },
-            unit_amount: item.price * 100
+            // Convert price to integer cents
+            unit_amount: Math.round(item.price * 100)
         },
-        quantity: item.quantity,
-        metadata: {
-            product_id: item.product_id,            
-        }
+        quantity: item.quantity
     }));
 
     return lineItems;
 }
+
+
 
 async function createCheckoutSession(userId, orderItems, orderId) {
     const lineItems = createLineItems(orderItems);
@@ -27,8 +30,8 @@ async function createCheckoutSession(userId, orderItems, orderId) {
         payment_method_types: ['card'],
         line_items: lineItems,
         mode: 'payment',
-        success_url: `${process.env.CLIENT_URL}/success`,
-        cancel_url: `${process.env.CLIENT_URL}/cancel`,
+        success_url: `https://www.google.com`,
+        cancel_url: `https://www.yahoo.com`,
         metadata: {            
             userId: userId,
             orderId: orderId
@@ -40,6 +43,6 @@ async function createCheckoutSession(userId, orderItems, orderId) {
 
 
 module.exports = {
-    createCheckoutSession,
-    updateCheckoutSession
+    createCheckoutSession
+    
 };

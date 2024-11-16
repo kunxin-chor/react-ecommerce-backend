@@ -1,11 +1,12 @@
 // make use of orderService and stripeService to check out a shopping cart
-
+const cartService = require('./cartService');
 const orderService = require('./orderService');
 const stripeService = require('./stripeService');
 
-async function checkout(userId, orderItems)  {    
-    const orderId = await orderService.createOrder(userId, orderItems, session.id);
-    const session = await stripeService.updateCheckoutSession(session.id, orderId);
+async function checkout(userId)  {    
+    const orderItems = await cartService.getCartContents(userId);
+    const orderId = await orderService.createOrder(userId, orderItems);
+    const session = await stripeService.createCheckoutSession(userId, orderItems, orderId);
     await orderService.updateOrderSessionId(orderId, session.id);
         
     return session;
