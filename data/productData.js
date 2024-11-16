@@ -10,6 +10,7 @@ async function getProductById(id) {
   return rows[0];
 }
 
+
 module.exports = {
   getAllProducts,getProductById
 };

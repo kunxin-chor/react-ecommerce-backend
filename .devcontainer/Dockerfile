@@ -13,5 +13,8 @@ COPY . /workspace
 # Install any needed packages specified in package.json
 # RUN npm install
 
+# Create a .my.cnf file to set the default MySQL host
+RUN echo "[client]\nhost=db" > /home/node/.my.cnf && chown node:node /home/node/.my.cnf
+
 # Make port 3000 available to the world outside this container
 EXPOSE 3000
