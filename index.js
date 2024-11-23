@@ -4,7 +4,7 @@ require('dotenv').config();
 const productsRouter = require('./routes/products');
 const userRoutes = require('./routes/users');
 const cartRoutes = require('./routes/cart');
-const orderRoutes = require('./routes/order');
+const checkoutRoutes = require('./routes/checkout');
 
 const app = express();
 
@@ -16,7 +16,7 @@ app.use(express.json());
 app.use('/api/products', productsRouter);
 app.use('/api/users', userRoutes);
 app.use('/api/cart', cartRoutes);
-app.use('/api/order', orderRoutes);
+app.use('/api/checkout', checkoutRoutes);
 
 // Basic route
 app.get('/', (req, res) => {

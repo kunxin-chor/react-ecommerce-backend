@@ -39,5 +39,5 @@ async function updateCart(userId, cartItems) {
 
 module.exports = {
   getCartContents,
-  updateCart, // New bulk update function
+  updateCart
 };
