@@ -5,7 +5,7 @@ const orderService = require('../services/orderService');
 const checkoutService = require('../services/checkoutService');
 const UserAuth = require('../middleware/UserAuth');
 
-router.post('/', UserAuth, async (req, res) => {
+router.post('/', [UserAuth,express.json()], async (req, res) => {
     try {
         const session = await checkoutService.checkout(req.user.userId);
         res.json(session);
@@ -16,6 +16,7 @@ router.post('/', UserAuth, async (req, res) => {
 
 // Webhook for Stripe
 router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+    console.log("webhook called");
     let event;
     try {
         const sig = req.headers['stripe-signature'];

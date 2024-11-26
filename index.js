@@ -10,12 +10,12 @@ const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+// app.use(express.json()); <-- can't use it with stripe
 
 // Routes
-app.use('/api/products', productsRouter);
-app.use('/api/users', userRoutes);
-app.use('/api/cart', cartRoutes);
+app.use('/api/products', express.json(), productsRouter);
+app.use('/api/users', express.json(), userRoutes);
+app.use('/api/cart', express.json(), cartRoutes);
 app.use('/api/checkout', checkoutRoutes);
 
 // Basic route
